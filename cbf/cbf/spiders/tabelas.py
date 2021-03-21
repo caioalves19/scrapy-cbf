@@ -2,6 +2,8 @@ import scrapy
 
 
 def tratar_time(time):
+    # Alguns nomes da CBF não estão gramaticalmente corretos ou não estavam de acordo para o meu projeto pessoal
+    
     nome_recebido = ['America', 'Sampaio Correa', 'Boa',
                      'Clube de Esportes Uniao', 'Minas Brasilia', 'CEU ABC', 'America - MG', 'Goianesia', 'Marilia']
     nome_desejado = ['América', 'Sampaio Corrêa',
@@ -17,6 +19,8 @@ def tratar_time(time):
 
 
 def tratar_cidade(cidade):
+    # Alguns nomes da CBF não estão gramaticalmente corretos
+
     nome_recebido = ['Sao Paulo', 'Braganca Paulista', 'Goiania', 'Florianopolis',
                      'Maceio', 'São Luis', 'Ribeirao Preto', 'Chapeco', 'Nova Iguacu', 'Niteroi', 'Macapa', 'Xanxere', 'Maracanau', 'Criciuma', 'Pocos de Caldas', 'Rondonopolis', 'Joao Pessoa']
     nome_desejado = ['São Paulo', 'Bragança Paulista', 'Goiânia', 'Florianópolis',
@@ -32,6 +36,8 @@ def tratar_cidade(cidade):
 
 
 def tratar_estadio(estadio):
+    # Alguns nomes da CBF não estão gramaticalmente corretos ou não estavam de acordo para o meu projeto pessoal
+
     nome_recebido = ['Manoel Barradas', 'Nilton Santos',
                      'CAT do Cajú']
     nome_desejado = ['Barradão', 'Engenhão',
@@ -47,6 +53,8 @@ def tratar_estadio(estadio):
 
 
 def tratar_data(data):
+    # Necessitava do padrão xx/xx/xxxx
+
     if 'A definir' in data:
         return '00/00/0000'
     else:
@@ -66,6 +74,8 @@ def tratar_data(data):
 
 
 def tratar_estado(sigla):
+    # Necessitava do Estado escrito por extenso
+
     estados_ab = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS',
                   'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
     estados = ['Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal', 'Espírito Santo', 'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul', 'Minas Gerais', 'Pará',
@@ -77,8 +87,13 @@ def tratar_estado(sigla):
     return estados[index]
 
 
+# Lista de links dos campeonatos
+# Para adicionar um novo campeonato, basta colocar o link ao fim da lista
 campeonatos = ['https://www.cbf.com.br/futebol-brasileiro/competicoes/copa-nordeste-masculino', 'https://www.cbf.com.br/futebol-brasileiro/competicoes/copa-brasil-sub20',
                'https://www.cbf.com.br/futebol-brasileiro/competicoes/campeonato-brasileiro-feminino-a1', 'https://www.cbf.com.br/futebol-brasileiro/competicoes/campeonato-brasileiro-sub17', 'https://www.cbf.com.br/futebol-brasileiro/competicoes/copa-brasil-masculino']
+
+# Configuração de cada campeonato. Alguns eu queria pegar a arbitragem, outros não.
+# Número de jogos e de rodadas serve para descobrir de qual rodada é o jogo, uma vez que a CBF só coloca o nº do jogo.
 
 copa_nordeste = {'nome': 'Copa do Nordeste',
                  'arbitragem': True, 'rodadas': 8, 'jogos_rodada': 8}
@@ -106,6 +121,7 @@ class TabelasSpider(scrapy.Spider):
             yield scrapy.Request(link, callback=self.parse_jogos)
 
     def parse_jogos(self, response):
+        # Verificando de qual campeonato é o jogo que chegou
         part_links = ['copa-nordeste-masculino', 'copa-brasil-sub20',
                       'campeonato-brasileiro-feminino-a1', 'campeonato-brasileiro-sub17', 'copa-brasil-masculino']
         c = 0
@@ -138,6 +154,7 @@ class TabelasSpider(scrapy.Spider):
         num_jogo = int(response.css(
             '.text-1::text').get().strip().split('Jogo:')[1].strip())
 
+        #Descobrindo de qual rodada é o jogo
         c = 0
         for i in range(campeonato_escolhido['rodadas']):
             if num_jogo > c and num_jogo <= c+campeonato_escolhido["jogos_rodada"]:
@@ -145,6 +162,7 @@ class TabelasSpider(scrapy.Spider):
                 break
             c += campeonato_escolhido['jogos_rodada']
 
+        #Verificando se é necessário pegar arbitragem
         if campeonato_escolhido['arbitragem']:
             arbitragem_check = response.css('#arbitros tbody th').getall()
             if arbitragem_check:
