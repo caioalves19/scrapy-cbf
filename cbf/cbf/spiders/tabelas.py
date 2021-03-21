@@ -3,7 +3,7 @@ import scrapy
 
 def tratar_time(time):
     # Alguns nomes da CBF não estão gramaticalmente corretos ou não estavam de acordo para o meu projeto pessoal
-    
+
     nome_recebido = ['America', 'Sampaio Correa', 'Boa',
                      'Clube de Esportes Uniao', 'Minas Brasilia', 'CEU ABC', 'America - MG', 'Goianesia', 'Marilia']
     nome_desejado = ['América', 'Sampaio Corrêa',
@@ -154,7 +154,7 @@ class TabelasSpider(scrapy.Spider):
         num_jogo = int(response.css(
             '.text-1::text').get().strip().split('Jogo:')[1].strip())
 
-        #Descobrindo de qual rodada é o jogo
+        # Descobrindo de qual rodada é o jogo
         c = 0
         for i in range(campeonato_escolhido['rodadas']):
             if num_jogo > c and num_jogo <= c+campeonato_escolhido["jogos_rodada"]:
@@ -162,7 +162,7 @@ class TabelasSpider(scrapy.Spider):
                 break
             c += campeonato_escolhido['jogos_rodada']
 
-        #Verificando se é necessário pegar arbitragem
+        # Verificando se é necessário pegar arbitragem
         if campeonato_escolhido['arbitragem']:
             arbitragem_check = response.css('#arbitros tbody th').getall()
             if arbitragem_check:
